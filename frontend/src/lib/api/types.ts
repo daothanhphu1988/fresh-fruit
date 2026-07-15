@@ -11,6 +11,7 @@ export interface ApiProduct {
   name: string;
   categoryId: number;
   categoryName: string;
+  categorySlug: string;
   price: number;
   salePrice: number | null;
   stock: number;

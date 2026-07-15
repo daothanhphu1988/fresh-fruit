@@ -11,10 +11,19 @@ import { formatDate } from "@/lib/format";
 
 async function fetchPost(slug: string) {
   try {
-    return adaptBlogPost(await api.get<ApiBlogPost>(`/api/blogs/${slug}`));
+    return adaptBlogPost(
+      await api.get<ApiBlogPost>(`/api/blogs/${slug}`, { next: { revalidate: 300 } })
+    );
   } catch {
     return null;
   }
+}
+
+function fetchAllPosts() {
+  return api
+    .get<ApiBlogPost[]>("/api/blogs", { next: { revalidate: 300 } })
+    .then((list) => list.map(adaptBlogPost))
+    .catch(() => []);
 }
 
 export async function generateMetadata({
@@ -33,13 +42,9 @@ export default async function BlogDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = await fetchPost(slug);
+  const [post, allPosts] = await Promise.all([fetchPost(slug), fetchAllPosts()]);
   if (!post) notFound();
 
-  const allPosts = await api
-    .get<ApiBlogPost[]>("/api/blogs")
-    .then((list) => list.map(adaptBlogPost))
-    .catch(() => []);
   const related = allPosts.filter((p) => p.id !== post.id).slice(0, 4);
 
   return (

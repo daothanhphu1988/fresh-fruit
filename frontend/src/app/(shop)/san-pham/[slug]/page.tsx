@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight, ShieldCheck, Truck, Undo2 } from "lucide-react";
 import { api } from "@/lib/api/client";
-import { adaptCategory, adaptProduct, adaptReview } from "@/lib/api/adapters";
-import type { ApiCategory, ApiPage, ApiProduct, ApiReview } from "@/lib/api/types";
+import { adaptProduct, adaptReview } from "@/lib/api/adapters";
+import type { ApiPage, ApiProduct, ApiReview } from "@/lib/api/types";
 import { ProductGallery } from "@/components/shop/product-gallery";
 import { ProductDetailActions } from "@/components/shop/product-detail-actions";
 import { ProductCard } from "@/components/shop/product-card";
@@ -11,9 +11,17 @@ import { RatingStars } from "@/components/shop/rating-stars";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate } from "@/lib/format";
 
+// Cache product/review/related reads for a short window so repeat visits
+// don't re-hit the backend+DB on every request; checkout still recomputes
+// authoritative price/stock server-side regardless of this display cache.
+const REVALIDATE_SECONDS = 30;
+
 async function fetchProduct(slug: string) {
   try {
-    return adaptProduct(await api.get<ApiProduct>(`/api/products/${slug}`));
+    const raw = await api.get<ApiProduct>(`/api/products/${slug}`, {
+      next: { revalidate: REVALIDATE_SECONDS },
+    });
+    return { product: adaptProduct(raw), categorySlug: raw.categorySlug, categoryName: raw.categoryName };
   } catch {
     return null;
   }
@@ -25,8 +33,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = await fetchProduct(slug);
-  return { title: product ? product.name : "Sản phẩm" };
+  const result = await fetchProduct(slug);
+  return { title: result ? result.product.name : "Sản phẩm" };
 }
 
 export default async function ProductDetailPage({
@@ -35,24 +43,25 @@ export default async function ProductDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = await fetchProduct(slug);
-  if (!product) notFound();
+  const result = await fetchProduct(slug);
+  if (!result) notFound();
+  const { product, categorySlug, categoryName } = result;
 
-  const [categories, reviews] = await Promise.all([
-    api.get<ApiCategory[]>("/api/categories").then((list) => list.map(adaptCategory)),
+  const [reviews, relatedAll] = await Promise.all([
     api
-      .get<ApiReview[]>(`/api/reviews?productId=${product.id}`)
+      .get<ApiReview[]>(`/api/reviews?productId=${product.id}`, {
+        next: { revalidate: REVALIDATE_SECONDS },
+      })
       .then((list) => list.map(adaptReview))
+      .catch(() => []),
+    api
+      .get<ApiPage<ApiProduct>>(`/api/products?category=${categorySlug}&size=5`, {
+        next: { revalidate: REVALIDATE_SECONDS },
+      })
+      .then((p) => p.content.map(adaptProduct))
       .catch(() => []),
   ]);
 
-  const category = categories.find((c) => c.id === product.categoryId);
-  const relatedAll = category
-    ? await api
-        .get<ApiPage<ApiProduct>>(`/api/products?category=${category.slug}&size=5`)
-        .then((p) => p.content.map(adaptProduct))
-        .catch(() => [])
-    : [];
   const related = relatedAll.filter((p) => p.id !== product.id).slice(0, 4);
 
   const discount = product.salePrice
@@ -69,14 +78,14 @@ export default async function ProductDetailPage({
         <Link href="/san-pham" className="hover:text-foreground">
           Sản phẩm
         </Link>
-        {category && (
+        {categoryName && (
           <>
             <ChevronRight className="size-3" />
             <Link
-              href={`/san-pham?category=${category.slug}`}
+              href={`/san-pham?category=${categorySlug}`}
               className="hover:text-foreground"
             >
-              {category.name}
+              {categoryName}
             </Link>
           </>
         )}

@@ -3,6 +3,13 @@ spring:
     name: fresh-fruit-backend
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+  jpa:
+    properties:
+      hibernate:
+        # Batches lazy-loaded associations (product.category, product.images,
+        # etc.) into IN-clause queries instead of one query per row, avoiding
+        # N+1 query storms on list endpoints like /api/products.
+        default_batch_fetch_size: 32
 
 app:
   jwt:

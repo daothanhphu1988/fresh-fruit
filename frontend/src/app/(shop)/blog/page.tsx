@@ -7,7 +7,7 @@ export const metadata = { title: "Cẩm nang trái cây" };
 
 export default async function BlogListPage() {
   const posts = await api
-    .get<ApiBlogPost[]>("/api/blogs")
+    .get<ApiBlogPost[]>("/api/blogs", { next: { revalidate: 300 } })
     .then((list) => list.map(adaptBlogPost))
     .catch(() => []);
 
