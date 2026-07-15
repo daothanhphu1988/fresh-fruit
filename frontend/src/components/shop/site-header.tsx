@@ -24,6 +24,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -205,9 +206,11 @@ export function SiteHeader() {
             <DropdownMenuContent align="end" className="w-56">
               {mounted && currentUser ? (
                 <>
-                  <DropdownMenuLabel>
-                    Xin chào, {currentUser.fullName}
-                  </DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>
+                      Xin chào, {currentUser.fullName}
+                    </DropdownMenuLabel>
+                  </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem render={<Link href="/tai-khoan" />}>
                     Tổng quan tài khoản
