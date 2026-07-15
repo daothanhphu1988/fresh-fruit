@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: fresh-fruit-backend
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:fresh-fruit-dev-secret-key-change-me-in-production-0123456789}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+server:
+  port: ${PORT:8080}
