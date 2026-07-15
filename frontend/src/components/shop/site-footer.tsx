@@ -84,15 +84,15 @@ export function SiteFooter() {
             <ul className="mt-4 space-y-3 text-sm text-sidebar-foreground/70">
               <li className="flex gap-2">
                 <MapPin className="size-4 shrink-0 mt-0.5" />
-                123 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh
+                Thọ Tân, Xuân Thọ, Xuân Lộc, TP. Đồng Nai
               </li>
               <li className="flex gap-2">
                 <Phone className="size-4 shrink-0 mt-0.5" />
-                1900 6868 (7:00 - 21:00 mỗi ngày)
+                0984 999 087 (7:00 - 21:00 mỗi ngày)
               </li>
               <li className="flex gap-2">
                 <Mail className="size-4 shrink-0 mt-0.5" />
-                hello@freshfruit.vn
+                daothanhphu@gmail.com
               </li>
             </ul>
             <form className="mt-4 flex gap-2">

@@ -73,7 +73,7 @@ export function SiteHeader() {
           <p>🍉 Miễn phí giao hàng cho đơn từ 300.000đ trong nội thành</p>
           <div className="flex items-center gap-4">
             <span className="inline-flex items-center gap-1">
-              <Phone className="size-3" /> 1900 6868
+              <Phone className="size-3" /> 0984 999 087
             </span>
             <Link href="/blog" className="hover:underline">
               Tin tức
