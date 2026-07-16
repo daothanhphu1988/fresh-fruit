@@ -88,7 +88,7 @@ export function SiteFooter() {
               </li>
               <li className="flex gap-2">
                 <Phone className="size-4 shrink-0 mt-0.5" />
-                0984 999 000 (7:00 - 21:00 mỗi ngày)
+                0123 456 789 (7:00 - 21:00 mỗi ngày)
               </li>
               <li className="flex gap-2">
                 <Mail className="size-4 shrink-0 mt-0.5" />
