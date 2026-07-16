@@ -150,9 +150,9 @@ export default async function ProductDetailPage({
               <dd className="font-medium">{product.expiry}</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground text-xs">Tồn kho</dt>
+              <dt className="text-muted-foreground text-xs">Tình trạng</dt>
               <dd className="font-medium">
-                {product.stock > 0 ? `${product.stock} ${product.unit}` : "Hết hàng"}
+                {product.stock > 0 ? "Còn hàng" : "Hết hàng"}
               </dd>
             </div>
             <div>

@@ -50,7 +50,7 @@ export function ProductDetailActions({ product }: { product: Product }) {
           </Button>
         </div>
         <span className="text-muted-foreground text-xs">
-          Còn {product.stock} {product.unit}
+          {product.stock > 0 ? "Còn hàng" : "Hết hàng"}
         </span>
       </div>
 
