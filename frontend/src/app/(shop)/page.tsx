@@ -36,8 +36,20 @@ const TRUST_BADGES = [
 export default function HomePage() {
   const { data: banners, isLoading: bannersLoading } = useBanners();
   const { data: categories, isLoading: categoriesLoading } = useCategories();
-  const { data: productsPage, isLoading: productsLoading } = useProducts();
+  const {
+    data: productsPage,
+    isLoading: productsLoading,
+    isError: productsError,
+  } = useProducts();
   const { data: blogPosts, isLoading: blogLoading } = useBlogPosts();
+
+  if (productsError) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-24 text-center text-muted-foreground">
+        Không thể tải dữ liệu trang chủ lúc này. Vui lòng tải lại trang.
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-12 px-4 py-6 sm:px-6 lg:px-8">

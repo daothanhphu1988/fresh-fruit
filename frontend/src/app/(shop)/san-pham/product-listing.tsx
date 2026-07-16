@@ -75,8 +75,16 @@ export function ProductListing() {
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const { data: categories, isLoading: categoriesLoading } = useCategories();
-  const { data: productsPage, isLoading: productsLoading } = useProducts();
+  const {
+    data: categories,
+    isLoading: categoriesLoading,
+    isError: categoriesError,
+  } = useCategories();
+  const {
+    data: productsPage,
+    isLoading: productsLoading,
+    isError: productsError,
+  } = useProducts();
   const products = useMemo(() => productsPage?.content ?? [], [productsPage]);
   const origins = useMemo(
     () => Array.from(new Set(products.map((p) => p.origin))).sort(),
@@ -257,7 +265,11 @@ export function ProductListing() {
             </Select>
           </div>
 
-          {productsLoading || categoriesLoading ? (
+          {productsError || categoriesError ? (
+            <div className="rounded-xl border border-dashed py-20 text-center text-muted-foreground">
+              Không thể tải sản phẩm lúc này. Vui lòng thử lại sau.
+            </div>
+          ) : productsLoading || categoriesLoading ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               {Array.from({ length: 9 }).map((_, i) => (
                 <Skeleton key={i} className="aspect-[3/4.5] rounded-xl" />
