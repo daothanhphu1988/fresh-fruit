@@ -24,6 +24,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { AdminPagination } from "@/components/admin/admin-pagination";
 import {
   useCategories,
   useCreateCategory,
@@ -32,6 +33,7 @@ import {
   useUpdateCategory,
 } from "@/lib/api/queries";
 import { ApiError } from "@/lib/api/client";
+import { usePagination } from "@/lib/hooks/use-pagination";
 import type { Category } from "@/lib/types";
 
 const emptyForm = { name: "", slug: "", icon: "🍎", image: "", description: "" };
@@ -55,6 +57,7 @@ export default function AdminCategoriesPage() {
     if (!q) return true;
     return c.name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q);
   });
+  const { page, setPage, totalPages, paginated } = usePagination(filteredCategories, 10);
 
   function openCreate() {
     setEditingId(null);
@@ -163,7 +166,10 @@ export default function AdminCategoriesPage() {
         <Input
           placeholder="Tìm theo tên hoặc slug..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
           className="pl-8"
         />
       </div>
@@ -192,7 +198,7 @@ export default function AdminCategoriesPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredCategories.map((c) => (
+              paginated.map((c) => (
                 <TableRow key={c.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -225,6 +231,8 @@ export default function AdminCategoriesPage() {
           </TableBody>
         </Table>
       </div>
+
+      <AdminPagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

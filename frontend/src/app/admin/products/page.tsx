@@ -32,6 +32,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { AdminPagination } from "@/components/admin/admin-pagination";
 import {
   useCategories,
   useCreateProduct,
@@ -40,6 +41,7 @@ import {
   useUpdateProduct,
 } from "@/lib/api/queries";
 import { ApiError } from "@/lib/api/client";
+import { usePagination } from "@/lib/hooks/use-pagination";
 import { formatCurrency } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
@@ -88,6 +90,7 @@ export default function AdminProductsPage() {
     if (!q) return true;
     return p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q);
   });
+  const { page, setPage, totalPages, paginated } = usePagination(filteredProducts, 10);
 
   function openCreate() {
     setEditingId(null);
@@ -261,7 +264,10 @@ export default function AdminProductsPage() {
         <Input
           placeholder="Tìm theo tên hoặc SKU..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
           className="pl-8"
         />
       </div>
@@ -292,7 +298,7 @@ export default function AdminProductsPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredProducts.map((p) => (
+              paginated.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -339,6 +345,8 @@ export default function AdminProductsPage() {
           </TableBody>
         </Table>
       </div>
+
+      <AdminPagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

@@ -28,8 +28,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { AdminPagination } from "@/components/admin/admin-pagination";
 import { useAdminOrders, useUpdateOrderStatus } from "@/lib/api/queries";
 import { ApiError } from "@/lib/api/client";
+import { usePagination } from "@/lib/hooks/use-pagination";
 import {
   ORDER_STATUS_LABELS,
   PAYMENT_METHOD_LABELS,
@@ -66,6 +68,7 @@ export default function AdminOrdersPage() {
       o.phone.toLowerCase().includes(q)
     );
   });
+  const { page, setPage, totalPages, paginated } = usePagination(filteredOrders, 10);
 
   return (
     <div className="flex flex-col gap-6">
@@ -79,7 +82,10 @@ export default function AdminOrdersPage() {
         <Input
           placeholder="Tìm theo mã đơn, tên khách, SĐT..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
           className="pl-8"
         />
       </div>
@@ -111,7 +117,7 @@ export default function AdminOrdersPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredOrders.map((o) => (
+              paginated.map((o) => (
                 <TableRow key={o.id}>
                   <TableCell className="font-medium">{o.code}</TableCell>
                   <TableCell>
@@ -166,6 +172,8 @@ export default function AdminOrdersPage() {
           </TableBody>
         </Table>
       </div>
+
+      <AdminPagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
       <Dialog open={!!viewing} onOpenChange={(open) => !open && setViewing(null)}>
         <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">

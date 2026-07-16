@@ -30,6 +30,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { AdminPagination } from "@/components/admin/admin-pagination";
 import {
   useAdminCoupons,
   useCreateCoupon,
@@ -38,6 +39,7 @@ import {
   type AdminCouponInput,
 } from "@/lib/api/queries";
 import { ApiError } from "@/lib/api/client";
+import { usePagination } from "@/lib/hooks/use-pagination";
 import { formatCurrency } from "@/lib/format";
 import type { Voucher } from "@/lib/types";
 
@@ -69,6 +71,7 @@ export default function AdminVouchersPage() {
     if (!q) return true;
     return v.code.toLowerCase().includes(q) || v.description.toLowerCase().includes(q);
   });
+  const { page, setPage, totalPages, paginated } = usePagination(filteredCoupons, 10);
 
   function openCreate() {
     setEditingId(null);
@@ -249,7 +252,10 @@ export default function AdminVouchersPage() {
         <Input
           placeholder="Tìm theo mã hoặc mô tả..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
           className="pl-8"
         />
       </div>
@@ -282,7 +288,7 @@ export default function AdminVouchersPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredCoupons.map((v) => (
+              paginated.map((v) => (
                 <TableRow key={v.id}>
                   <TableCell>
                     <div className="font-medium">{v.code}</div>
@@ -325,6 +331,8 @@ export default function AdminVouchersPage() {
           </TableBody>
         </Table>
       </div>
+
+      <AdminPagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }
