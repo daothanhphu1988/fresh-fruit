@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { cartSubtotal, useCartStore } from "@/lib/stores/cart-store";
-import { findVoucherByCode } from "@/lib/mock-data/vouchers";
-import { useShippingSettings } from "@/lib/api/queries";
+import { ApiError } from "@/lib/api/client";
+import { fetchCouponByCode, useShippingSettings } from "@/lib/api/queries";
 import { formatCurrency } from "@/lib/format";
 
 export default function CartPage() {
@@ -27,6 +27,7 @@ export default function CartPage() {
   const shippingFeeAmount = shipping?.shippingFee ?? 25000;
 
   const [couponInput, setCouponInput] = useState("");
+  const [applying, setApplying] = useState(false);
 
   const subtotal = mounted ? cartSubtotal(items) : 0;
   const shippingFee = subtotal === 0 || subtotal >= freeShipThreshold ? 0 : shippingFeeAmount;
@@ -40,20 +41,34 @@ export default function CartPage() {
     : 0;
   const total = Math.max(0, subtotal - discount + shippingFee);
 
-  function handleApplyVoucher() {
-    const found = findVoucherByCode(couponInput.trim());
-    if (!found) {
-      toast.error("Mã giảm giá không hợp lệ.");
-      return;
+  async function handleApplyVoucher() {
+    const code = couponInput.trim();
+    if (!code) return;
+    setApplying(true);
+    try {
+      const found = await fetchCouponByCode(code);
+      const today = new Date().toISOString().slice(0, 10);
+      if (today < found.startDate || today > found.endDate) {
+        toast.error("Mã giảm giá đã hết hạn hoặc chưa có hiệu lực.");
+        return;
+      }
+      if (found.usageLimit > 0 && found.usedCount >= found.usageLimit) {
+        toast.error("Mã giảm giá đã hết lượt sử dụng.");
+        return;
+      }
+      if (subtotal < found.minOrder) {
+        toast.error(
+          `Đơn hàng tối thiểu ${formatCurrency(found.minOrder)} để áp dụng mã này.`
+        );
+        return;
+      }
+      applyVoucher(found);
+      toast.success(`Đã áp dụng mã "${found.code}"`);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Mã giảm giá không hợp lệ.");
+    } finally {
+      setApplying(false);
     }
-    if (subtotal < found.minOrder) {
-      toast.error(
-        `Đơn hàng tối thiểu ${formatCurrency(found.minOrder)} để áp dụng mã này.`
-      );
-      return;
-    }
-    applyVoucher(found);
-    toast.success(`Đã áp dụng mã "${found.code}"`);
   }
 
   if (!mounted) return null;
@@ -150,7 +165,7 @@ export default function CartPage() {
                 value={couponInput}
                 onChange={(e) => setCouponInput(e.target.value)}
               />
-              <Button onClick={handleApplyVoucher} className="shrink-0">
+              <Button onClick={handleApplyVoucher} disabled={applying} className="shrink-0">
                 Áp dụng
               </Button>
             </div>

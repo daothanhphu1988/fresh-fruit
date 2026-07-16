@@ -7,6 +7,7 @@ import {
   adaptBanner,
   adaptBlogPost,
   adaptCategory,
+  adaptCoupon,
   adaptOrder,
   adaptProduct,
   adaptReview,
@@ -16,6 +17,7 @@ import type {
   ApiBanner,
   ApiBlogPost,
   ApiCategory,
+  ApiCoupon,
   ApiOrder,
   ApiPage,
   ApiProduct,
@@ -280,5 +282,55 @@ export function useUpdateShippingSettings() {
     mutationFn: (input: ApiShippingSettings) =>
       api.put<ApiShippingSettings>("/api/admin/shipping-settings", input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["shipping-settings"] }),
+  });
+}
+
+export async function fetchCouponByCode(code: string) {
+  return adaptCoupon(await api.get<ApiCoupon>(`/api/coupons/${encodeURIComponent(code)}`));
+}
+
+export function useAdminCoupons(enabled: boolean) {
+  return useQuery({
+    queryKey: ["admin-coupons"],
+    queryFn: async () => (await api.get<ApiCoupon[]>("/api/admin/coupons")).map(adaptCoupon),
+    enabled,
+  });
+}
+
+export interface AdminCouponInput {
+  code: string;
+  type: "percent" | "amount";
+  value: number;
+  minOrder: number;
+  maxDiscount?: number;
+  startDate: string;
+  endDate: string;
+  description: string;
+  usageLimit: number;
+}
+
+export function useCreateCoupon() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: AdminCouponInput) =>
+      adaptCoupon(await api.post<ApiCoupon>("/api/admin/coupons", input)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-coupons"] }),
+  });
+}
+
+export function useUpdateCoupon() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, input }: { id: string; input: AdminCouponInput }) =>
+      adaptCoupon(await api.put<ApiCoupon>(`/api/admin/coupons/${id}`, input)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-coupons"] }),
+  });
+}
+
+export function useDeleteCoupon() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => api.delete(`/api/admin/coupons/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-coupons"] }),
   });
 }

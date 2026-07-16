@@ -3,6 +3,8 @@ package com.freshfruit.backend.config;
 import com.freshfruit.backend.domain.Banner;
 import com.freshfruit.backend.domain.BlogPost;
 import com.freshfruit.backend.domain.Category;
+import com.freshfruit.backend.domain.Coupon;
+import com.freshfruit.backend.domain.DiscountType;
 import com.freshfruit.backend.domain.Product;
 import com.freshfruit.backend.domain.ProductImage;
 import com.freshfruit.backend.domain.Role;
@@ -10,10 +12,12 @@ import com.freshfruit.backend.domain.User;
 import com.freshfruit.backend.repository.BannerRepository;
 import com.freshfruit.backend.repository.BlogPostRepository;
 import com.freshfruit.backend.repository.CategoryRepository;
+import com.freshfruit.backend.repository.CouponRepository;
 import com.freshfruit.backend.repository.ProductRepository;
 import com.freshfruit.backend.repository.RoleRepository;
 import com.freshfruit.backend.repository.UserRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +42,7 @@ public class DataSeeder implements CommandLineRunner {
     private final ProductRepository productRepository;
     private final BannerRepository bannerRepository;
     private final BlogPostRepository blogPostRepository;
+    private final CouponRepository couponRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -63,6 +68,7 @@ public class DataSeeder implements CommandLineRunner {
         seedProducts(categories);
         seedBanners();
         seedBlogPosts();
+        seedCoupons();
     }
 
     private Map<String, Category> seedCategories() {
@@ -272,6 +278,45 @@ public class DataSeeder implements CommandLineRunner {
                         .category("Mẹo hay")
                         .author("Đội ngũ Fresh Fruit")
                         .readMinutes(5)
+                        .build());
+    }
+
+    private void seedCoupons() {
+        if (couponRepository.count() > 0) return;
+        LocalDate today = LocalDate.now();
+        couponRepository.save(
+                Coupon.builder()
+                        .code("FRESH10")
+                        .type(DiscountType.PERCENT)
+                        .value(BigDecimal.valueOf(10))
+                        .minOrder(BigDecimal.valueOf(200_000))
+                        .maxDiscount(BigDecimal.valueOf(50_000))
+                        .startDate(today.minusMonths(1))
+                        .endDate(today.plusYears(1))
+                        .description("Giảm 10% cho đơn hàng đầu tiên, tối đa 50.000đ")
+                        .usageLimit(1000)
+                        .build());
+        couponRepository.save(
+                Coupon.builder()
+                        .code("FREESHIP")
+                        .type(DiscountType.AMOUNT)
+                        .value(BigDecimal.valueOf(30_000))
+                        .minOrder(BigDecimal.valueOf(300_000))
+                        .startDate(today.minusMonths(1))
+                        .endDate(today.plusYears(1))
+                        .description("Miễn phí vận chuyển cho đơn từ 300.000đ")
+                        .usageLimit(2000)
+                        .build());
+        couponRepository.save(
+                Coupon.builder()
+                        .code("SUMMER50")
+                        .type(DiscountType.AMOUNT)
+                        .value(BigDecimal.valueOf(50_000))
+                        .minOrder(BigDecimal.valueOf(500_000))
+                        .startDate(today.minusMonths(1))
+                        .endDate(today.plusMonths(2))
+                        .description("Giảm ngay 50.000đ cho đơn từ 500.000đ mùa hè")
+                        .usageLimit(500)
                         .build());
     }
 }

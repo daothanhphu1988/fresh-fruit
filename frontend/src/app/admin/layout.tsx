@@ -10,6 +10,7 @@ import {
   ClipboardList,
   Settings,
   Store,
+  Ticket,
 } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth-store";
 
@@ -18,6 +19,7 @@ const NAV = [
   { href: "/admin/products", label: "Sản phẩm", icon: Package },
   { href: "/admin/categories", label: "Danh mục", icon: FolderTree },
   { href: "/admin/orders", label: "Đơn hàng", icon: ClipboardList },
+  { href: "/admin/vouchers", label: "Mã giảm giá", icon: Ticket },
   { href: "/admin/settings", label: "Cài đặt", icon: Settings },
 ];
 

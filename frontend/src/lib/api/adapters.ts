@@ -9,6 +9,7 @@ import type {
   Review,
   Address,
   Season,
+  Voucher,
 } from "@/lib/types";
 import type {
   ApiProduct,
@@ -18,6 +19,7 @@ import type {
   ApiOrder,
   ApiReview,
   ApiAddress,
+  ApiCoupon,
 } from "./types";
 
 export function adaptCategory(c: ApiCategory): Category {
@@ -136,5 +138,21 @@ export function adaptOrder(o: ApiOrder): Order {
     discount: o.discount,
     total: o.total,
     createdAt: o.createdAt,
+  };
+}
+
+export function adaptCoupon(c: ApiCoupon): Voucher {
+  return {
+    id: String(c.id),
+    code: c.code,
+    type: c.type as Voucher["type"],
+    value: c.value,
+    minOrder: c.minOrder,
+    maxDiscount: c.maxDiscount ?? undefined,
+    startDate: c.startDate,
+    endDate: c.endDate,
+    description: c.description,
+    usageLimit: c.usageLimit,
+    usedCount: c.usedCount,
   };
 }

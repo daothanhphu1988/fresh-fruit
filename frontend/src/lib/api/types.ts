@@ -123,3 +123,17 @@ export interface ApiShippingSettings {
   freeShipThreshold: number;
   shippingFee: number;
 }
+
+export interface ApiCoupon {
+  id: number;
+  code: string;
+  type: string;
+  value: number;
+  minOrder: number;
+  maxDiscount: number | null;
+  startDate: string;
+  endDate: string;
+  description: string;
+  usageLimit: number;
+  usedCount: number;
+}
