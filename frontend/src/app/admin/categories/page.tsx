@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +48,13 @@ export default function AdminCategoriesPage() {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [search, setSearch] = useState("");
+
+  const filteredCategories = categories.filter((c) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return c.name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q);
+  });
 
   function openCreate() {
     setEditingId(null);
@@ -151,6 +158,16 @@ export default function AdminCategoriesPage() {
         </Dialog>
       </div>
 
+      <div className="relative max-w-sm">
+        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+        <Input
+          placeholder="Tìm theo tên hoặc slug..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-8"
+        />
+      </div>
+
       <div className="overflow-hidden rounded-xl border bg-card">
         <Table>
           <TableHeader>
@@ -168,8 +185,14 @@ export default function AdminCategoriesPage() {
                   Đang tải...
                 </TableCell>
               </TableRow>
+            ) : filteredCategories.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-muted-foreground text-center">
+                  Không tìm thấy danh mục nào.
+                </TableCell>
+              </TableRow>
             ) : (
-              categories.map((c) => (
+              filteredCategories.map((c) => (
                 <TableRow key={c.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,6 +62,13 @@ export default function AdminVouchersPage() {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<AdminCouponInput>(emptyForm);
+  const [search, setSearch] = useState("");
+
+  const filteredCoupons = coupons.filter((v) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return v.code.toLowerCase().includes(q) || v.description.toLowerCase().includes(q);
+  });
 
   function openCreate() {
     setEditingId(null);
@@ -237,6 +244,16 @@ export default function AdminVouchersPage() {
         </Dialog>
       </div>
 
+      <div className="relative max-w-sm">
+        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+        <Input
+          placeholder="Tìm theo mã hoặc mô tả..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-8"
+        />
+      </div>
+
       <div className="overflow-hidden rounded-xl border bg-card">
         <Table>
           <TableHeader>
@@ -256,14 +273,16 @@ export default function AdminVouchersPage() {
                   Đang tải...
                 </TableCell>
               </TableRow>
-            ) : coupons.length === 0 ? (
+            ) : filteredCoupons.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-muted-foreground text-center">
-                  Chưa có mã giảm giá nào.
+                  {coupons.length === 0
+                    ? "Chưa có mã giảm giá nào."
+                    : "Không tìm thấy mã giảm giá nào."}
                 </TableCell>
               </TableRow>
             ) : (
-              coupons.map((v) => (
+              filteredCoupons.map((v) => (
                 <TableRow key={v.id}>
                   <TableCell>
                     <div className="font-medium">{v.code}</div>

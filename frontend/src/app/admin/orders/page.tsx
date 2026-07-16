@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Eye } from "lucide-react";
+import { Eye, Search } from "lucide-react";
 import { toast } from "sonner";
 import {
   Table,
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -54,12 +55,33 @@ export default function AdminOrdersPage() {
   const { data: orders = [], isLoading } = useAdminOrders(mounted);
   const updateStatus = useUpdateOrderStatus();
   const [viewing, setViewing] = useState<Order | null>(null);
+  const [search, setSearch] = useState("");
+
+  const filteredOrders = orders.filter((o) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      o.code.toLowerCase().includes(q) ||
+      o.customerName.toLowerCase().includes(q) ||
+      o.phone.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="font-heading text-2xl font-bold">Quản lý đơn hàng</h1>
         <p className="text-muted-foreground text-sm">{orders.length} đơn hàng</p>
+      </div>
+
+      <div className="relative max-w-sm">
+        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+        <Input
+          placeholder="Tìm theo mã đơn, tên khách, SĐT..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-8"
+        />
       </div>
 
       <div className="overflow-hidden rounded-xl border bg-card">
@@ -82,8 +104,14 @@ export default function AdminOrdersPage() {
                   Đang tải...
                 </TableCell>
               </TableRow>
+            ) : filteredOrders.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-muted-foreground text-center">
+                  Không tìm thấy đơn hàng nào.
+                </TableCell>
+              </TableRow>
             ) : (
-              orders.map((o) => (
+              filteredOrders.map((o) => (
                 <TableRow key={o.id}>
                   <TableCell className="font-medium">{o.code}</TableCell>
                   <TableCell>
