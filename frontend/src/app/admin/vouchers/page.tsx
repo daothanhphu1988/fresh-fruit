@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { FileSpreadsheet, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,7 @@ import {
 } from "@/lib/api/queries";
 import { ApiError } from "@/lib/api/client";
 import { usePagination } from "@/lib/hooks/use-pagination";
+import { exportToExcel } from "@/lib/export-excel";
 import { formatCurrency } from "@/lib/format";
 import type { Voucher } from "@/lib/types";
 
@@ -124,6 +125,25 @@ export default function AdminVouchersPage() {
 
   const saving = createCoupon.isPending || updateCoupon.isPending;
 
+  function handleExport() {
+    exportToExcel(
+      "ma-giam-gia",
+      "Mã giảm giá",
+      filteredCoupons.map((v) => ({
+        "Mã": v.code,
+        "Loại": v.type === "percent" ? "Phần trăm" : "Số tiền cố định",
+        "Giá trị": v.value,
+        "Giảm tối đa": v.maxDiscount ?? "",
+        "Đơn tối thiểu": v.minOrder,
+        "Ngày bắt đầu": v.startDate,
+        "Ngày kết thúc": v.endDate,
+        "Giới hạn lượt dùng": v.usageLimit,
+        "Đã dùng": v.usedCount,
+        "Mô tả": v.description,
+      }))
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -131,11 +151,15 @@ export default function AdminVouchersPage() {
           <h1 className="font-heading text-2xl font-bold">Quản lý mã giảm giá</h1>
           <p className="text-muted-foreground text-sm">{coupons.length} mã giảm giá</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger render={<Button className="gap-1.5" onClick={openCreate} />}>
-            <Plus className="size-4" /> Thêm mã giảm giá
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-1.5" onClick={handleExport}>
+            <FileSpreadsheet className="size-4" /> Xuất Excel
+          </Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger render={<Button className="gap-1.5" onClick={openCreate} />}>
+              <Plus className="size-4" /> Thêm mã giảm giá
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>{editingId ? "Sửa mã giảm giá" : "Thêm mã giảm giá mới"}</DialogTitle>
             </DialogHeader>
@@ -244,7 +268,8 @@ export default function AdminVouchersPage() {
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       <div className="relative max-w-sm">

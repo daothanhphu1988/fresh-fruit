@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Eye, Search } from "lucide-react";
+import { Eye, FileSpreadsheet, Search } from "lucide-react";
 import { toast } from "sonner";
 import {
   Table,
@@ -32,6 +32,7 @@ import { AdminPagination } from "@/components/admin/admin-pagination";
 import { useAdminOrders, useUpdateOrderStatus } from "@/lib/api/queries";
 import { ApiError } from "@/lib/api/client";
 import { usePagination } from "@/lib/hooks/use-pagination";
+import { exportToExcel } from "@/lib/export-excel";
 import {
   ORDER_STATUS_LABELS,
   PAYMENT_METHOD_LABELS,
@@ -70,11 +71,36 @@ export default function AdminOrdersPage() {
   });
   const { page, setPage, totalPages, paginated } = usePagination(filteredOrders, 10);
 
+  function handleExport() {
+    exportToExcel(
+      "don-hang",
+      "Đơn hàng",
+      filteredOrders.map((o) => ({
+        "Mã đơn": o.code,
+        "Khách hàng": o.customerName,
+        "Số điện thoại": o.phone,
+        "Địa chỉ": o.address,
+        "Ngày đặt": formatDate(o.createdAt),
+        "Thanh toán": PAYMENT_METHOD_LABELS[o.paymentMethod],
+        "Tạm tính": o.subtotal,
+        "Giảm giá": o.discount,
+        "Phí vận chuyển": o.shippingFee,
+        "Tổng tiền": o.total,
+        "Trạng thái": ORDER_STATUS_LABELS[o.status],
+      }))
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-heading text-2xl font-bold">Quản lý đơn hàng</h1>
-        <p className="text-muted-foreground text-sm">{orders.length} đơn hàng</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-heading text-2xl font-bold">Quản lý đơn hàng</h1>
+          <p className="text-muted-foreground text-sm">{orders.length} đơn hàng</p>
+        </div>
+        <Button variant="outline" className="gap-1.5" onClick={handleExport}>
+          <FileSpreadsheet className="size-4" /> Xuất Excel
+        </Button>
       </div>
 
       <div className="relative max-w-sm">

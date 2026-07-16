@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { FileSpreadsheet, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,7 @@ import {
 } from "@/lib/api/queries";
 import { ApiError } from "@/lib/api/client";
 import { usePagination } from "@/lib/hooks/use-pagination";
+import { exportToExcel } from "@/lib/export-excel";
 import type { Category } from "@/lib/types";
 
 const emptyForm = { name: "", slug: "", icon: "🍎", image: "", description: "" };
@@ -110,6 +111,19 @@ export default function AdminCategoriesPage() {
 
   const saving = createCategory.isPending || updateCategory.isPending;
 
+  function handleExport() {
+    exportToExcel(
+      "danh-muc",
+      "Danh mục",
+      filteredCategories.map((c) => ({
+        "Tên danh mục": c.name,
+        Slug: c.slug,
+        "Số sản phẩm": products.filter((p) => p.categoryId === c.id).length,
+        "Mô tả": c.description,
+      }))
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -117,11 +131,15 @@ export default function AdminCategoriesPage() {
           <h1 className="font-heading text-2xl font-bold">Quản lý danh mục</h1>
           <p className="text-muted-foreground text-sm">{categories.length} danh mục</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger render={<Button className="gap-1.5" onClick={openCreate} />}>
-            <Plus className="size-4" /> Thêm danh mục
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-1.5" onClick={handleExport}>
+            <FileSpreadsheet className="size-4" /> Xuất Excel
+          </Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger render={<Button className="gap-1.5" onClick={openCreate} />}>
+              <Plus className="size-4" /> Thêm danh mục
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>{editingId ? "Sửa danh mục" : "Thêm danh mục mới"}</DialogTitle>
             </DialogHeader>
@@ -158,7 +176,8 @@ export default function AdminCategoriesPage() {
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       <div className="relative max-w-sm">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { FileSpreadsheet, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -42,6 +42,7 @@ import {
 } from "@/lib/api/queries";
 import { ApiError } from "@/lib/api/client";
 import { usePagination } from "@/lib/hooks/use-pagination";
+import { exportToExcel } from "@/lib/export-excel";
 import { formatCurrency } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
@@ -157,6 +158,24 @@ export default function AdminProductsPage() {
 
   const saving = createProduct.isPending || updateProduct.isPending;
 
+  function handleExport() {
+    exportToExcel(
+      "san-pham",
+      "Sản phẩm",
+      filteredProducts.map((p) => ({
+        "Tên sản phẩm": p.name,
+        SKU: p.sku,
+        "Danh mục": categories.find((c) => c.id === p.categoryId)?.name ?? "",
+        "Giá gốc": p.price,
+        "Giá khuyến mãi": p.salePrice ?? "",
+        "Tồn kho": p.stock,
+        "Đơn vị": p.unit,
+        "Xuất xứ": p.origin,
+        "Hữu cơ": p.isOrganic ? "Có" : "Không",
+      }))
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -164,10 +183,14 @@ export default function AdminProductsPage() {
           <h1 className="font-heading text-2xl font-bold">Quản lý sản phẩm</h1>
           <p className="text-muted-foreground text-sm">{products.length} sản phẩm</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger render={<Button className="gap-1.5" onClick={openCreate} />}>
-            <Plus className="size-4" /> Thêm sản phẩm
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-1.5" onClick={handleExport}>
+            <FileSpreadsheet className="size-4" /> Xuất Excel
+          </Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger render={<Button className="gap-1.5" onClick={openCreate} />}>
+              <Plus className="size-4" /> Thêm sản phẩm
+            </DialogTrigger>
           <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>{editingId ? "Sửa sản phẩm" : "Thêm sản phẩm mới"}</DialogTitle>
@@ -256,7 +279,8 @@ export default function AdminProductsPage() {
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       <div className="relative max-w-sm">
