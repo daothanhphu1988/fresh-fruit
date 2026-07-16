@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,6 +54,7 @@ const emptyForm = {
   origin: "",
   image: "",
   description: "",
+  organic: false,
 };
 
 function slugify(name: string) {
@@ -99,6 +101,7 @@ export default function AdminProductsPage() {
       origin: p.origin,
       image: p.images[0]?.url ?? "",
       description: p.description,
+      organic: p.isOrganic,
     });
     setOpen(true);
   }
@@ -120,7 +123,7 @@ export default function AdminProductsPage() {
       unit: form.unit,
       origin: form.origin || "Việt Nam",
       season: existing?.season ?? "Quanh năm",
-      organic: existing?.isOrganic ?? false,
+      organic: form.organic,
       featured: existing?.isFeatured ?? false,
       description: form.description,
       weight: existing?.weight ?? "",
@@ -229,6 +232,13 @@ export default function AdminProductsPage() {
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                 />
               </div>
+              <label className="col-span-2 flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={form.organic}
+                  onCheckedChange={(v) => setForm({ ...form, organic: !!v })}
+                />
+                Sản phẩm hữu cơ
+              </label>
             </div>
             <DialogFooter>
               <Button onClick={handleSubmit} disabled={saving}>
