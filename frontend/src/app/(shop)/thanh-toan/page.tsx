@@ -19,14 +19,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { cartSubtotal, useCartStore } from "@/lib/stores/cart-store";
-import { useCreateOrder } from "@/lib/api/queries";
+import { useCreateOrder, useShippingSettings } from "@/lib/api/queries";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/format";
 import { PAYMENT_METHOD_LABELS, type PaymentMethod } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-const FREE_SHIP_THRESHOLD = 300000;
-const SHIPPING_FEE = 25000;
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, "Vui lòng nhập họ tên đầy đủ"),
@@ -56,6 +53,9 @@ export default function CheckoutPage() {
   const voucher = useCartStore((s) => s.voucher);
   const clearCart = useCartStore((s) => s.clear);
   const createOrder = useCreateOrder();
+  const { data: shipping } = useShippingSettings();
+  const freeShipThreshold = shipping?.freeShipThreshold ?? 300000;
+  const shippingFeeAmount = shipping?.shippingFee ?? 25000;
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cod");
   const orderPlacedRef = useRef(false);
 
@@ -65,7 +65,7 @@ export default function CheckoutPage() {
   });
 
   const subtotal = mounted ? cartSubtotal(items) : 0;
-  const shippingFee = subtotal >= FREE_SHIP_THRESHOLD ? 0 : SHIPPING_FEE;
+  const shippingFee = subtotal >= freeShipThreshold ? 0 : shippingFeeAmount;
   const discount = useMemo(() => {
     if (!voucher) return 0;
     return voucher.type === "percent"

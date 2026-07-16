@@ -10,10 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { cartSubtotal, useCartStore } from "@/lib/stores/cart-store";
 import { findVoucherByCode } from "@/lib/mock-data/vouchers";
+import { useShippingSettings } from "@/lib/api/queries";
 import { formatCurrency } from "@/lib/format";
-
-const FREE_SHIP_THRESHOLD = 300000;
-const SHIPPING_FEE = 25000;
 
 export default function CartPage() {
   const [mounted, setMounted] = useState(false);
@@ -24,11 +22,14 @@ export default function CartPage() {
   const removeItem = useCartStore((s) => s.removeItem);
   const voucher = useCartStore((s) => s.voucher);
   const applyVoucher = useCartStore((s) => s.applyVoucher);
+  const { data: shipping } = useShippingSettings();
+  const freeShipThreshold = shipping?.freeShipThreshold ?? 300000;
+  const shippingFeeAmount = shipping?.shippingFee ?? 25000;
 
   const [couponInput, setCouponInput] = useState("");
 
   const subtotal = mounted ? cartSubtotal(items) : 0;
-  const shippingFee = subtotal === 0 || subtotal >= FREE_SHIP_THRESHOLD ? 0 : SHIPPING_FEE;
+  const shippingFee = subtotal === 0 || subtotal >= freeShipThreshold ? 0 : shippingFeeAmount;
   const discount = voucher
     ? voucher.type === "percent"
       ? Math.min(
@@ -178,7 +179,7 @@ export default function CartPage() {
             </div>
             {shippingFee > 0 && (
               <p className="text-muted-foreground text-xs">
-                Miễn phí ship cho đơn từ {formatCurrency(FREE_SHIP_THRESHOLD)}
+                Miễn phí ship cho đơn từ {formatCurrency(freeShipThreshold)}
               </p>
             )}
             <div className="mt-1 flex justify-between border-t pt-3 text-base font-bold">

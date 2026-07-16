@@ -20,6 +20,7 @@ import type {
   ApiPage,
   ApiProduct,
   ApiReview,
+  ApiShippingSettings,
 } from "./types";
 import type { Address, Order, OrderStatus, PaymentMethod } from "@/lib/types";
 
@@ -263,5 +264,21 @@ export function useDeleteCategory() {
   return useMutation({
     mutationFn: async (id: string) => api.delete(`/api/admin/categories/${id}`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["categories"] }),
+  });
+}
+
+export function useShippingSettings() {
+  return useQuery({
+    queryKey: ["shipping-settings"],
+    queryFn: () => api.get<ApiShippingSettings>("/api/shipping-settings"),
+  });
+}
+
+export function useUpdateShippingSettings() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: ApiShippingSettings) =>
+      api.put<ApiShippingSettings>("/api/admin/shipping-settings", input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["shipping-settings"] }),
   });
 }

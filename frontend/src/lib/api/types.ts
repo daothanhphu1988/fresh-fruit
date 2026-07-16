@@ -118,3 +118,8 @@ export interface ApiAuthResponse {
   email: string;
   role: string;
 }
+
+export interface ApiShippingSettings {
+  freeShipThreshold: number;
+  shippingFee: number;
+}

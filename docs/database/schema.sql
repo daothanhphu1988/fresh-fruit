@@ -260,6 +260,19 @@ create table if not exists cart (
 );
 
 -- ---------------------------------------------------------------------------
+-- shipping_settings (single row, admin-editable via /admin)
+-- ---------------------------------------------------------------------------
+create table if not exists shipping_settings (
+    id                   bigserial primary key,
+    free_ship_threshold  numeric(12, 0) not null default 300000,
+    shipping_fee         numeric(12, 0) not null default 25000
+);
+
+insert into shipping_settings (id, free_ship_threshold, shipping_fee)
+values (1, 300000, 25000)
+on conflict (id) do nothing;
+
+-- ---------------------------------------------------------------------------
 -- notifications
 -- ---------------------------------------------------------------------------
 create table if not exists notifications (

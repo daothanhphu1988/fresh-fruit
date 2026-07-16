@@ -29,12 +29,10 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class OrderService {
 
-    private static final BigDecimal FREE_SHIP_THRESHOLD = BigDecimal.valueOf(300_000);
-    private static final BigDecimal SHIPPING_FEE = BigDecimal.valueOf(25_000);
-
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final CouponRepository couponRepository;
+    private final ShippingSettingsService shippingSettingsService;
 
     @Transactional
     public OrderResponse create(OrderRequest request, User user) {
@@ -77,8 +75,11 @@ public class OrderService {
             discount = applyCoupon(request.voucherCode(), subtotal);
         }
 
+        var shippingSettings = shippingSettingsService.getEntity();
         BigDecimal shippingFee =
-                subtotal.compareTo(FREE_SHIP_THRESHOLD) >= 0 ? BigDecimal.ZERO : SHIPPING_FEE;
+                subtotal.compareTo(shippingSettings.getFreeShipThreshold()) >= 0
+                        ? BigDecimal.ZERO
+                        : shippingSettings.getShippingFee();
         BigDecimal total = subtotal.subtract(discount).add(shippingFee);
         if (total.compareTo(BigDecimal.ZERO) < 0) total = BigDecimal.ZERO;
 

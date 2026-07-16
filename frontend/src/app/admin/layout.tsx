@@ -8,6 +8,7 @@ import {
   Package,
   FolderTree,
   ClipboardList,
+  Settings,
   Store,
 } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth-store";
@@ -17,6 +18,7 @@ const NAV = [
   { href: "/admin/products", label: "Sản phẩm", icon: Package },
   { href: "/admin/categories", label: "Danh mục", icon: FolderTree },
   { href: "/admin/orders", label: "Đơn hàng", icon: ClipboardList },
+  { href: "/admin/settings", label: "Cài đặt", icon: Settings },
 ];
 
 export default function AdminLayout({
